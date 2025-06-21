@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { signIn, signOut, getCurrentUser } from 'aws-amplify/auth';
 import Chatbot from './components/Chatbot';
-import ConnectApps from './components/ConnectApps';
-import CustomLogin from './components/CustomLogin';
+import ConnectApps from './components/ConnectApps.jsx';
+import CustomLogin from './components/CustomLogin.jsx';
 import awsConfig from './aws-config';
 import './App.css';
 
