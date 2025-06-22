@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 def get_user_from_token(auth_header):
     """Get user from Cognito using the access token"""
     if not auth_header or not auth_header.startswith('Bearer '):
+        print("Error: Missing or invalid Authorization header")
         abort(401, description="Missing token")
     
     access_token = auth_header.replace('Bearer ', '')
@@ -20,4 +21,5 @@ def get_user_from_token(auth_header):
         return user_id
         
     except ClientError as e:
+        print(e.response['Error']['Message'])
         abort(401, description="Invalid token")

@@ -16,7 +16,7 @@ export default function Chatbot({ user, signOut }) {
   const [messages, setMessages] = useState([
     { 
       id: 1, 
-      text: `Hey there, I'm Link! Let me know which of your favorite movie or tv charcters you'd like to speak with!`, 
+      text: `Hey there, I'm Link! Use me as your personal assistant and connect with various apps and services.`, 
       isBot: true, 
       timestamp: new Date() 
     }
@@ -57,7 +57,7 @@ export default function Chatbot({ user, signOut }) {
     const getAuthToken = async () => {
       try {
         const session = await fetchAuthSession();
-        const token = session.tokens.idToken.toString();
+        const token = session.tokens.accessToken.toString();
         setAuthToken(token);
         setIsConnected(true);
 
@@ -257,7 +257,13 @@ export default function Chatbot({ user, signOut }) {
               
               <div className="message-content">
                 <div className={`message-bubble ${message.isBot ? (message.isError ? 'error-bubble' : 'bot-bubble') : 'user-bubble'}`}>
-                    <ReactMarkdown className="message-text">{message.text}</ReactMarkdown>
+                    <ReactMarkdown 
+                      className="message-text" components={{
+                      li: ({ children }) => <li>{children}</li>,
+                      p: ({ children }) => <>{children}</>,
+                    }}>
+                      {message.text}
+                    </ReactMarkdown>
                 </div>
                 <div className="message-timestamp">
                   {formatTime(message.timestamp)}

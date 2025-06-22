@@ -551,3 +551,10 @@
     transform: translateX(-50%);
   }
 }
+
+.message-text p,
+.message-text li,
+.message-text ul,
+.message-text ol {
+  line-height: 1 !important;
+}
