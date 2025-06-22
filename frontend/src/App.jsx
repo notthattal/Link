@@ -5,6 +5,7 @@ import { signIn, signOut, getCurrentUser } from 'aws-amplify/auth';
 import Chatbot from './components/Chatbot';
 import ConnectApps from './components/ConnectApps.jsx';
 import CustomLogin from './components/CustomLogin.jsx';
+import OAuthCallback from './components/OAuthCallback.jsx';
 import awsConfig from './aws-config';
 import './App.css';
 
@@ -33,15 +34,14 @@ function App() {
     setUser(null);
   };
 
-  if (loading) return <div>Loading...</div>;
-
   return (
     <div className="App">
       <Router>
         {user ? (
           <Routes>
             <Route path="/" element={<Chatbot user={user} signOut={handleSignOut} />} />
-            <Route path="/connect-apps" element={<ConnectApps />} />
+            <Route path="/connect-apps" element={<ConnectApps user={user} />} />
+            <Route path="/callback/:service" element={<OAuthCallback user={user} />} />
           </Routes>
         ) : (
           <CustomLogin onSignIn={setUser} />

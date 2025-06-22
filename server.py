@@ -2,13 +2,21 @@ from flask import Flask, request, jsonify, abort, make_response
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from services.persona_agent_service import PersonaAgent
+from services.utils.user_cache import user_tools_cache
+from services.utils.cognito_utils import get_user_from_token
+from services.utils.tools.app_manager import AppManager
+from services.bedrock_agent_service import BedrockAgent
 from services.connections_db_service import connections_bp
+from services.apps_sso_service import sso_service_bp
+import boto3
 
 app = Flask(__name__)
-app.register_blueprint(connections_bp)
 
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"], allow_headers=["Content-Type", "Authorization"])
+# Register blueprints for different services
+app.register_blueprint(connections_bp)
+app.register_blueprint(sso_service_bp)
+
+CORS(app, supports_credentials=True, origins='*', allow_headers=["Content-Type", "Authorization"])
 
 limiter = Limiter(
     get_remote_address,
@@ -16,7 +24,11 @@ limiter = Limiter(
     default_limits=["25 per minute"]
 )
 
-agent = PersonaAgent()
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('link-connections-table')
+
+app_manager = AppManager(table)
+agent = BedrockAgent(app_manager)
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
@@ -52,12 +64,19 @@ def generate():
     conversation_history = data.get('history', [])
     auth_header = request.headers.get('Authorization')
 
+    user_id = get_user_from_token(auth_header)
+    tools = user_tools_cache.get_user_tools(user_id)
+    if not tools:
+        tools = app_manager.get_user_tools(user_id)
+        user_tools_cache.set_user_tools(user_id, tools)
+
     try:
-        result = agent.process_message(user_message, conversation_history, auth_header)
+        result = agent.call_bedrock(user_message, conversation_history, auth_header, tools)
         response = jsonify(result)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     except Exception as e:
+        print(f"Error in generate endpoint: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
