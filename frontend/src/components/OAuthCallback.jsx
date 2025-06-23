@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
+
 const OAuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -18,7 +21,7 @@ const OAuthCallback = () => {
       const service = location.pathname.split('/')[2];
       
       if (error || !code) {
-        window.location.href = 'http://localhost:5173/connect-apps';
+        window.location.href = frontendUrl;
         return;
       }
       
@@ -26,7 +29,7 @@ const OAuthCallback = () => {
         const session = await fetchAuthSession();
         const userToken = session.tokens.accessToken.toString();
         
-        await fetch(`http://localhost:5050/api/callback/${service}`, {
+        await fetch(`${backendUrl}/api/callback/${service}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -35,9 +38,9 @@ const OAuthCallback = () => {
           body: JSON.stringify({ code })
         });
         
-        window.location.href = 'http://localhost:5173/connect-apps';
+        window.location.href = `${frontendUrl}/connect-app`;
       } catch (error) {
-        window.location.href = 'http://localhost:5173/connect-apps?error=callback_failed';
+        window.location.href = `${frontendUrl}/connect-apps?error=callback_failed`;
       }
     };
     

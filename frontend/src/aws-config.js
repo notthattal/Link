@@ -1,15 +1,15 @@
 const awsConfig = {
   Auth: {
     Cognito: {
-      region: 'us-east-1', // Your AWS region
-      userPoolId: 'us-east-1_RwbDs7naF', // Your User Pool ID
-      userPoolClientId: '42sbpug2u49vp7o3h7c7k9bcac', // Your App Client ID
+      region: import.meta.env.VITE_AWS_REGION,
+      userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+      userPoolClientId: import.meta.env.VITE_COGNITO_USER_POOL_CLIENT_ID,
       loginWith: {
         oauth: {
-          domain: 'https://us-east-1rwbds7naf.auth.us-east-1.amazoncognito.com',
+          domain: import.meta.env.VITE_COGNITO_DOMAIN,
           scopes: ['openid', 'email', 'profile'],
-          redirectSignIn: ['http://localhost:5173/'],
-          redirectSignOut: ['http://localhost:5173/'],
+          redirectSignIn: [import.meta.env.VITE_FRONTEND_URL],
+          redirectSignOut: [import.meta.env.VITE_FRONTEND_URL],
           responseType: 'code'
         }
       }

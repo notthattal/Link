@@ -4,6 +4,9 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import './ConnectApps.css';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const frontendUrl = import.meta.env.VITE_REDIRECT_URI;
+
 const ConnectApps = ({ user }) => {
  const navigate = useNavigate();
  const [searchQuery, setSearchQuery] = useState('');
@@ -188,7 +191,7 @@ const ConnectApps = ({ user }) => {
        const session = await fetchAuthSession();
        const token = session.tokens.accessToken.toString();
        
-       const response = await fetch('http://localhost:5050/api/user/get_connections', {
+       const response = await fetch(`${backendUrl}/api/user/get_connections`, {
          headers: {
            'Authorization': `Bearer ${token}`,
            'Content-Type': 'application/json'
@@ -225,7 +228,7 @@ const ConnectApps = ({ user }) => {
 
  const handleSpotifyConnect = () => {
   const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-  const redirectUri = 'https://c7ae-68-193-25-143.ngrok-free.app/callback/spotify';
+  const redirectUri = `${frontendUrl}/callback/spotify`;
   const scopes = 'user-read-private user-read-email user-library-read user-top-read playlist-modify-private playlist-modify-public';
 
   const spotifyAuthUrl = `https://accounts.spotify.com/authorize?` +
@@ -241,7 +244,7 @@ const ConnectApps = ({ user }) => {
 
  const handleGmailConnect = () => {
   const clientId = import.meta.env.VITE_GMAIL_CLIENT_ID;
-  const redirectUri = 'https://c7ae-68-193-25-143.ngrok-free.app/callback/gmail';
+  const redirectUri = `${frontendUrl}/callback/gmail`;
   const scopes = [
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/gmail.send',
