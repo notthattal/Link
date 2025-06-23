@@ -178,8 +178,6 @@ class SpotifyAppTool(AppTool):
                 json={'tracks': [{'uri': track_uri}]}
             )
 
-            print(response.json())
-            
             return "Track removed from playlist" if response.status_code == 200 else f"Error: {response.status_code}"
 
         elif tool_name == 'spotify_get_user_playlists':
@@ -224,7 +222,6 @@ class SpotifyAppTool(AppTool):
             return f"Artist info error: {response.status_code}"
 
         elif tool_name == 'spotify_get_artist_top_tracks':
-            print(tool_args['artist_name'])
             artist_id = self.get_artist_id_from_name(tool_args['artist_name'], headers)
         
             if artist_id is None:

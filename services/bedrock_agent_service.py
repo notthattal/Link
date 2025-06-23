@@ -66,7 +66,5 @@ class BedrockAgent:
                 "guardrailVersion": self.bedrock_guardrail_version,
                 "trace": "enabled"
             })
-        
-        print(response)
 
         return {'completion': response['output']['message']['content'][0]['text']}
