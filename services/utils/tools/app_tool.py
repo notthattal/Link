@@ -1,8 +1,9 @@
 import requests
 import boto3
 import time
+import os
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION', 'us-east-1'))
 
 class AppTool():
     def __init__(self, table):

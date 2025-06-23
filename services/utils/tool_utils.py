@@ -1,9 +1,9 @@
 from services.utils.tools.spotify_tools import SpotifyAppTool
 from services.utils.tools.gmail_tools import GmailAppTool
 import boto3
-import time
+import os
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION', 'us-east-1'))
 table = dynamodb.Table('link-connections-table')
 
 def get_user_tools(connected_apps):

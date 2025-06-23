@@ -9,6 +9,7 @@ from services.bedrock_agent_service import BedrockAgent
 from services.connections_db_service import connections_bp
 from services.apps_sso_service import sso_service_bp
 import boto3
+import os
 
 app = Flask(__name__)
 
@@ -24,7 +25,7 @@ limiter = Limiter(
     default_limits=["25 per minute"]
 )
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION', 'us-east-1'))
 table = dynamodb.Table('link-connections-table')
 
 app_manager = AppManager(table)

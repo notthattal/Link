@@ -5,10 +5,11 @@ from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 from services.utils.user_cache import user_tools_cache
 from services.utils.tool_utils import get_user_tools
+import os
 
 connections_bp = Blueprint('connections_bp', __name__)
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION', 'us-east-1'))
 table = dynamodb.Table('link-connections-table')
 
 @connections_bp.route('/api/user/get_connections', methods=['GET'])
