@@ -14,5 +14,5 @@ COPY . .
 # Set environment variables if needed
 ENV PYTHONUNBUFFERED=1
 
-# Command to run your app (adjust if not Flask)
-CMD ["python", "server.py"]
+# Command to run your app 
+CMD ["gunicorn", "server:app", "--bind", "0.0.0.0:8080"]
