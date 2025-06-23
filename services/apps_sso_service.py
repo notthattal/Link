@@ -16,7 +16,9 @@ def redirect_to_frontend(provider):
     error = request.args.get('error')
 
     if error:
+        print(f'Error in redirect_to_frontend: {error}')
         return redirect(f"{FRONTEND_URL}/connect-apps?error={error}")
+    
     return redirect(f"{FRONTEND_URL}/callback/{provider}?code={code}")
 
 @sso_service_bp.route('/api/callback/<provider>', methods=['POST'])
