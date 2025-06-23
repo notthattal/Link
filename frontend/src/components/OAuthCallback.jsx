@@ -38,7 +38,7 @@ const OAuthCallback = () => {
           body: JSON.stringify({ code })
         });
         
-        window.location.href = `${frontendUrl}/connect-app`;
+        window.location.href = `${frontendUrl}/connect-apps`;
       } catch (error) {
         window.location.href = `${frontendUrl}/connect-apps?error=callback_failed`;
       }
