@@ -16,11 +16,6 @@
 - AWS Cognito handles all user authentication flows.
 - Only verified users are allowed to invoke protected endpoints.
 
-### Rate Limiting
-
-- Flask backend enforces rate limiting at 25 requests per minute using `flask-limiter`.
-- Additional throttling and usage plans can be configured via API Gateway for production deployments.
-
 ### Data Handling and Privacy
 
 - User identity is tracked internally using the Cognito `sub` UUID only.
