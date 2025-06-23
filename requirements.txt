@@ -8,3 +8,4 @@ pytest-cov==6.1.1
 pydantic==2.11.5
 pandas==2.3.0
 boto3==1.38.41
+gunicorn==23.0.0
