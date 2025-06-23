@@ -9,6 +9,24 @@ This system is a chatbot that a user can connect external applications to and us
 
 ![Architecture Diagram](./img/architecture_diagram.png)
 
+### AWS Service Images
+
+#### Cloudwatch Dashboard
+
+![Cloudwatch Dash](./img/cloudwatch_dash.png)
+
+#### DynamoDB Schema
+
+![DynamoDB Schema](./img/dynamo_db_schema.png)
+
+#### Bedrock Guardrails
+
+- PII Guardrail
+![Guardrail PII](./img/guardrail_pii.png)
+
+- Prompt Injection Guardrail
+![Guardrail Prompt](./img/guardrail_prompt_injection.png)
+
 ### Flow
 1. A user can either sign-in or create an account which is authenticated through AWS Cognito
 2. A user can either connect an application or begin chatting
