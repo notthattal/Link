@@ -1,14 +1,14 @@
 ## User Guide
 
 ### What It Does
-This chatbot allows you to interact with any persona of your choosing. From historical figures to superheros, CharacterBot is a fun and new way to interact with your favorite characters.
+This chatbot allows you to interact with a chatbot and use it as a personal assistant which can connect with external applications and perform actions.
 
 ### How to install
 
 1. Clone this repository 
 ```bash
-git clone https://github.com/notthattal/AwsGenAIImplementation.git
-cd AwsGenAIImplementation
+git clone https://github.com/notthattal/Link.git
+cd Link
 ```
 
 2. Create and activate a virtual environment
@@ -43,9 +43,10 @@ python server.py
 pytest --cov=.
 ```
 
-### How to interact with CharacterBot
+### How to use
 
 1. Create an account or sign-in
 2. Verify your account (if first time signing in)
-3. Tell CharacterBot which persona you would like to speak to
-4. Chat like you would with any other chatbot! It's that easy!
+3. Select the gear in the top right and go to the ConnectApps page to select which apps you would like to use
+4. Authenticate with the app you would like to use
+5. Navigate back to the homepage and start chatting!
