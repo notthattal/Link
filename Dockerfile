@@ -15,4 +15,4 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 
 # Command to run your app (adjust if not Flask)
-CMD ["python", "app.py"]
+CMD ["python", "server.py"]
