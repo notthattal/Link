@@ -1,3 +1,4 @@
+import json
 import requests
 from services.utils.tools.app_tool import AppTool
 import os
@@ -16,15 +17,20 @@ class SpotifyAppTool(AppTool):
             {
                 "toolSpec": {
                     "name": "spotify_add_to_playlist",
-                    "description": "Add a track to a Spotify playlist",
+                    "description": (
+                        "Use this to ADD a song to a playlist. Trigger this tool when the user asks to 'add', 'save', 'put', or 'include' a song in any playlist. "
+                        "The playlist name and song title must be extracted from the user's request. "
+                        "Do NOT use this when the user just wants to search or look up a song."
+                    ),
                     "inputSchema": {
                         "json": {
                             "type": "object",
                             "properties": {
-                                "playlist_id": {"type": "string", "description": "Spotify playlist ID"},
-                                "track_uri": {"type": "string", "description": "Spotify track URI"}
+                                "query": {"type": "string", "description": "The user's original query"},
+                                "playlist_name": {"type": "string", "description": "Spotify playlist name"},
+                                "track_name": {"type": "string", "description": "Spotify track name"}
                             },
-                            "required": ["playlist_id", "track_uri"]
+                            "required": ["query", "playlist_name", "track_name"]
                         }
                     }
                 }
@@ -37,10 +43,11 @@ class SpotifyAppTool(AppTool):
                         "json": {
                             "type": "object",
                             "properties": {
-                                "playlist_id": {"type": "string", "description": "Spotify playlist ID"},
-                                "track_uri": {"type": "string", "description": "Spotify track URI"}
+                                "query": {"type": "string", "description": "The user's original query"},
+                                "playlist_name": {"type": "string", "description": "Spotify playlist name"},
+                                "track_name": {"type": "string", "description": "Spotify track name"}
                             },
-                            "required": ["playlist_id", "track_uri"]
+                            "required": ["query", "playlist_name", "track_name"]
                         }
                     }
                 }
@@ -60,7 +67,7 @@ class SpotifyAppTool(AppTool):
             {
                 "toolSpec": {
                     "name": "spotify_search_tracks",
-                    "description": "Search for tracks on Spotify",
+                    "description": "Only use when the user is explicitly asking to search or look up songs. !!!!!!!! DO NOT USE IF A USER ASKS TO ADD OR REMOVE !!!!!!!",
                     "inputSchema": {
                         "json": {
                             "type": "object",
@@ -75,47 +82,15 @@ class SpotifyAppTool(AppTool):
             },
             {
                 "toolSpec": {
-                    "name": "spotify_get_audio_features",
-                    "description": "Get audio features for a track like tempo, energy, valence",
-                    "inputSchema": {
-                        "json": {
-                            "type": "object",
-                            "properties": {
-                                "track_uri": {"type": "string", "description": "Spotify track URI"}
-                            },
-                            "required": ["track_uri"]
-                        }
-                    }
-                }
-            },
-            {
-                "toolSpec": {
                     "name": "spotify_get_artist_info",
                     "description": "Get metadata about an artist like genres, popularity, and followers",
                     "inputSchema": {
                         "json": {
                             "type": "object",
                             "properties": {
-                                "artist_id": {"type": "string", "description": "Spotify artist ID"}
+                                "artist_name": {"type": "string", "description": "Spotify artist name"}
                             },
-                            "required": ["artist_id"]
-                        }
-                    }
-                }
-            },
-            {
-                "toolSpec": {
-                    "name": "spotify_get_recommendations",
-                    "description": "Get track recommendations based on seed tracks, artists, or genres",
-                    "inputSchema": {
-                        "json": {
-                            "type": "object",
-                            "properties": {
-                                "seed_tracks": {"type": "array", "items": {"type": "string"}, "description": "Seed track IDs"},
-                                "seed_artists": {"type": "array", "items": {"type": "string"}, "description": "Seed artist IDs"},
-                                "seed_genres": {"type": "array", "items": {"type": "string"}, "description": "Seed genres"},
-                                "limit": {"type": "integer", "description": "Number of recommendations", "default": 10}
-                            }
+                            "required": ["artist_name"]
                         }
                     }
                 }
@@ -128,27 +103,64 @@ class SpotifyAppTool(AppTool):
                         "json": {
                             "type": "object",
                             "properties": {
-                                "artist_id": {"type": "string", "description": "Spotify artist ID"},
+                                "artist_name": {"type": "string", "description": "Spotify artist name"},
                                 "market": {"type": "string", "description": "Market country code", "default": "US"}
                             },
-                            "required": ["artist_id"]
+                            "required": ["artist_name"]
                         }
                     }
                 }
             }
         ]
+    
+    def search_tracks(self, tool_args, headers):
+        params = {'q': tool_args['query'], 'type': 'track', 'limit': tool_args.get('limit', 10)}
+        response = requests.get('https://api.spotify.com/v1/search', headers=headers, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            tracks = data['tracks']['items']
+            results = [f"{t['name']} by {t['artists'][0]['name']} - {t['uri']}" for t in tracks]
+            return results
+    
+        return None
+        
+    def get_artist_id_from_name(self, artist_name, headers):
+        search_resp = requests.get(
+            'https://api.spotify.com/v1/search',
+            headers=headers,
+            params={'q': artist_name, 'type': 'artist', 'limit': 10}
+        )
+        if search_resp.status_code != 200:
+            return None
+
+        artists = search_resp.json()['artists']['items']
+        for artist in artists:
+            if artist['name'].lower() == artist_name.lower():
+                return artist['id']
+
+        return None
+    
+    def get_playlist_id_by_name(self, name, headers):
+        response = requests.get('https://api.spotify.com/v1/me/playlists', headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            for p in data['items']:
+                if p['name'].lower() == name.lower():
+                    return p['id']
+        return None
 
     def call_tool(self, tool_name, tool_args, user_id):
         headers = self.get_app_headers(user_id)
+        print(f'Calling: {tool_name}')
 
         if tool_name == 'spotify_add_to_playlist':
-            search_results = self.call_tool("spotify_search_tracks", {"query": tool_args['query']}, user_id)
-            lines = search_results.splitlines()
-            first_uri = lines[0].split(" - ")[-1]
-            track_uri = first_uri.split(':')[-1]
-        
+            search_results = self.search_tracks(tool_args, headers)            
+            track_uri = search_results[0].split(" - ")[-1]
+            playlist_id = self.get_playlist_id_by_name(tool_args['playlist_name'], headers)
+
             response = requests.post(
-                f'https://api.spotify.com/v1/playlists/{tool_args["playlist_id"]}/tracks',
+                f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
                 headers=headers,
                 json={'uris': [track_uri]}
             )
@@ -156,16 +168,18 @@ class SpotifyAppTool(AppTool):
             return "Track added to playlist" if response.status_code == 201 else f"Error: {response.status_code}"
 
         elif tool_name == 'spotify_remove_from_playlist':
-            search_results = self.call_tool("spotify_search_tracks", {"query": tool_args['query']}, user_id)
-            lines = search_results.splitlines()
-            first_uri = lines[0].split(" - ")[-1]
-            track_uri = first_uri.split(':')[-1]
+            search_results = self.search_tracks(tool_args, headers)            
+            track_uri = search_results[0].split(" - ")[-1]
+            playlist_id = self.get_playlist_id_by_name(tool_args['playlist_name'], headers)
         
             response = requests.delete(
-                f'https://api.spotify.com/v1/playlists/{tool_args["playlist_id"]}/tracks',
+                f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
                 headers=headers,
                 json={'tracks': [{'uri': track_uri}]}
             )
+
+            print(response.json())
+            
             return "Track removed from playlist" if response.status_code == 200 else f"Error: {response.status_code}"
 
         elif tool_name == 'spotify_get_user_playlists':
@@ -177,52 +191,48 @@ class SpotifyAppTool(AppTool):
             return f"Error getting playlists: {response.status_code}"
 
         elif tool_name == 'spotify_search_tracks':
-            params = {'q': tool_args['query'], 'type': 'track', 'limit': tool_args.get('limit', 10)}
-            response = requests.get('https://api.spotify.com/v1/search', headers=headers, params=params)
-            if response.status_code == 200:
-                data = response.json()
-                tracks = data['tracks']['items']
-                results = [f"{t['name']} by {t['artists'][0]['name']} - {t['uri']}" for t in tracks]
+            results = self.search_tracks(tool_args, headers)
+            if results:
                 return "\n".join(results)
-            return f"Search error: {response.status_code}"
-
-        elif tool_name == 'spotify_get_audio_features':
-            search_results = self.call_tool("spotify_search_tracks", {"query": tool_args}, user_id)
-            lines = search_results.splitlines()
-            first_uri = lines[0].split(" - ")[-1]
-            track_id = first_uri.split(':')[-1]
-
-            response = requests.get(f'https://api.spotify.com/v1/audio-features/{track_id}', headers=headers)
-
-            if response.status_code == 200:
-                return response.json()
-            return f"Audio feature error: {response.status_code}"
+            return f"Error searching for songs in spotify"
 
         elif tool_name == 'spotify_get_artist_info':
-            response = requests.get(f'https://api.spotify.com/v1/artists/{tool_args["artist_id"]}', headers=headers)
-            if response.status_code == 200:
-                return response.json()
-            return f"Artist info error: {response.status_code}"
-
-        elif tool_name == 'spotify_get_recommendations':
-            params = {
-                'limit': tool_args.get('limit', 10),
-                'seed_tracks': ','.join([s for s in tool_args.get('seed_tracks', []) if s]),
-                'seed_artists': ','.join([s for s in tool_args.get('seed_artists', []) if s]),
-                'seed_genres': ','.join([s for s in tool_args.get('seed_genres', []) if s]),
-            }
-            response = requests.get('https://api.spotify.com/v1/recommendations', headers=headers, params=params)
-
+            artist_id = self.get_artist_id_from_name(tool_args['artist_name'], headers)
+            
+            if artist_id is None:
+                return f"Failed to get artist info for {tool_args['artist_name']}"
+            
+            response = requests.get(f'https://api.spotify.com/v1/artists/{artist_id}', headers=headers)
             if response.status_code == 200:
                 data = response.json()
-                return "\n".join(f"{t['name']} by {t['artists'][0]['name']}" for t in data['tracks'])
-            
-            return f"Recommendation error: {response.status_code}"
+                name = data.get('name', 'Unknown')
+                genres = ", ".join(data.get('genres', [])) or "None"
+                popularity = data.get('popularity', 'N/A')
+                followers = f"{data.get('followers', {}).get('total', 0):,}"
+                images = "\n\n".join(f"{img['url']} ({img['width']}x{img['height']})" for img in data.get('images', []))
+                url = data.get('external_urls', {}).get('spotify', '')
+
+                return (
+                    f"Here is the artist information for {name}:\n"
+                    f"Artist Name: {name}\n"
+                    f"Genres: {genres}\n"
+                    f"Popularity: {popularity}\n"
+                    f"Followers: {followers}\n"
+                    f"Images: \n\n{images}\n"
+                    f"Spotify URL: {url}"
+                )
+            return f"Artist info error: {response.status_code}"
 
         elif tool_name == 'spotify_get_artist_top_tracks':
+            print(tool_args['artist_name'])
+            artist_id = self.get_artist_id_from_name(tool_args['artist_name'], headers)
+        
+            if artist_id is None:
+                return f"Failed to get top tracks for {tool_args['artist_name']}"
+        
             market = tool_args.get('market', 'US')
             response = requests.get(
-                f'https://api.spotify.com/v1/artists/{tool_args["artist_id"]}/top-tracks',
+                f'https://api.spotify.com/v1/artists/{artist_id}/top-tracks',
                 headers=headers,
                 params={'market': market}
             )

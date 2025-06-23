@@ -226,7 +226,7 @@ const ConnectApps = ({ user }) => {
  const handleSpotifyConnect = () => {
   const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const redirectUri = 'https://c7ae-68-193-25-143.ngrok-free.app/callback/spotify';
-  const scopes = 'user-read-private user-read-email user-library-read user-top-read';
+  const scopes = 'user-read-private user-read-email user-library-read user-top-read playlist-modify-private playlist-modify-public';
 
   const spotifyAuthUrl = `https://accounts.spotify.com/authorize?` +
     `client_id=${clientId}&` +
