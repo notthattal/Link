@@ -8,7 +8,7 @@ load_dotenv()
 
 sso_service_bp = Blueprint('sso_service_bp', __name__)
 
-REDIRECT_URI = 'https://c7ae-68-193-25-143.ngrok-free.app/callback'
+FRONTEND_URL = os.getenv('FRONTEND_URL')
 
 @sso_service_bp.route('/callback/<provider>', methods=['GET'])
 def redirect_to_frontend(provider):
@@ -16,8 +16,8 @@ def redirect_to_frontend(provider):
     error = request.args.get('error')
 
     if error:
-        return redirect(f"http://localhost:5173/connect-apps?error={error}")
-    return redirect(f"http://localhost:5173/callback/{provider}?code={code}")
+        return redirect(f"{FRONTEND_URL}/connect-apps?error={error}")
+    return redirect(f"{FRONTEND_URL}/callback/{provider}?code={code}")
 
 @sso_service_bp.route('/api/callback/<provider>', methods=['POST'])
 def oauth_callback(provider):
@@ -52,7 +52,7 @@ def oauth_callback(provider):
     token_data = {
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': f"{REDIRECT_URI}/{provider}",
+        'redirect_uri': f"{FRONTEND_URL}/{provider}",
         'client_id': config['client_id'],
         'client_secret': config['client_secret']
     }

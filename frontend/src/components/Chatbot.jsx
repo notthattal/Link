@@ -5,6 +5,8 @@ import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 import { useNavigate } from 'react-router-dom';
 import './Chatbot.css';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 function stripMarkdownFences(text) {
   return text
     .replace(/```(?:\w+)?\n?/g, '') 
@@ -62,7 +64,7 @@ export default function Chatbot({ user, signOut }) {
         setIsConnected(true);
 
         // Reset persona once on mount
-        await fetch('http://localhost:5050/generate', {
+        await fetch(`${backendUrl}/generate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -97,7 +99,7 @@ export default function Chatbot({ user, signOut }) {
     const currentToken = authToken;
     
     try {
-      const response = await fetch('http://localhost:5050/generate', {
+      const response = await fetch(`${backendUrl}/generate`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
