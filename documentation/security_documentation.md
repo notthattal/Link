@@ -14,9 +14,7 @@
 ### Authentication and Authorization
 
 - AWS Cognito handles all user authentication flows.
-- API Gateway is configured with a Cognito Authorizer to verify JWT tokens for each request.
 - Only verified users are allowed to invoke protected endpoints.
-- Lambda functions extract the validated `sub` claim securely from the token via API Gateway's request context.
 
 ### Rate Limiting
 
@@ -25,22 +23,8 @@
 
 ### Data Handling and Privacy
 
-- No user PII (e.g., emails, names) is logged or stored.
 - User identity is tracked internally using the Cognito `sub` UUID only.
-- Prompt contents are optionally hashed or archived securely in S3.
 - All environment variables and credentials are scoped per environment and never exposed publicly.
-
-### Audit Logging
-
-- Each API invocation is logged to CloudWatch with:
-  - Timestamp
-  - Cognito user `sub`
-  - Request ID
-  - Prompt text
-  - Model response
-- Logs are structured with a consistent `AUDIT_LOG` prefix for easy traceability.
-- Request IDs can be correlated with CloudTrail events to determine full invocation context and user action.
-- Logs are stored in immutable AWS-managed infrastructure and monitored for unusual patterns.
 
 ### Safety Filters and Monitoring
 
