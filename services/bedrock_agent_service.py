@@ -1,3 +1,4 @@
+import os
 import boto3
 from typing import List
 from dotenv import load_dotenv
@@ -10,6 +11,8 @@ class BedrockAgent:
         self.client = boto3.client('bedrock-runtime', region_name='us-east-1')
         self.model_id = 'anthropic.claude-3-haiku-20240307-v1:0'
         self.app_manager = app_manager
+        self.bedrock_guardrail_id = os.getenv('BEDROCK_GUARD_RAIL_ID')
+        self.bedrock_guardrail_version = os.getenv('BEDROCK_GUARD_RAIL_VERSION')
 
     def call_bedrock(self, prompt: str, conversation_history: List = None, auth_header: str = None, tools: List = None) -> str:
         if conversation_history:
@@ -20,7 +23,12 @@ class BedrockAgent:
 
         request_body = {
             "modelId": self.model_id,
-            "messages": messages
+            "messages": messages,
+            "guardrailConfig": {
+                "guardrailIdentifier": self.bedrock_guardrail_id,
+                "guardrailVersion": self.bedrock_guardrail_version,
+                "trace": "enabled"
+            }
         }
 
         if tools:
@@ -49,6 +57,16 @@ class BedrockAgent:
             })
 
         messages.append({"role": "user", "content": [{"text": "Please format this response nicely. Don't mention that you are formatting anything"}]})
-        response = self.client.converse(modelId=self.model_id, messages=messages, toolConfig={"tools": tools})
+        response = self.client.converse(
+            modelId=self.model_id, 
+            messages=messages, 
+            toolConfig={"tools": tools},
+            guardrailConfig={
+                "guardrailIdentifier": self.bedrock_guardrail_id,
+                "guardrailVersion": self.bedrock_guardrail_version,
+                "trace": "enabled"
+            })
+        
+        print(response)
 
         return {'completion': response['output']['message']['content'][0]['text']}
