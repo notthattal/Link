@@ -44,3 +44,33 @@
 
 - All access to sensitive data is logged and reviewed
 - Docker builds and Git-based versioning are implemented for easy rollback
+
+### Security Measures
+- All user authentication is handled by AWS Cognito with JWT-based access control.
+- Environment variables and secrets are never exposed in client-side code or repositories.
+- API access is restricted to authenticated users only, unauthorized requests are rejected.
+
+### Error Handling and Resilience
+- The backend includes try/except blocks around all external API calls and critical logic.
+- Unhandled exceptions are logged via CloudWatch for root-cause analysis.
+- Graceful degradation is applied when third-party services are unavailable.
+
+### Performance and Scalability
+- Backend is containerized and deployable via scalable infrastructure like Railway or ECS.
+- Lightweight services and in-memory caching reduce latency for repeat requests.
+- AWS Bedrock is used to handle inference at scale with managed throughput.
+
+### Code Quality and Testing
+- Backend code is modularized using a service-based structure.
+- Unit tests are included with `pytest` and coverage measured via `pytest-cov`.
+- Linting and pre-commit hooks are enforced to maintain code quality.
+
+### Privacy Controls
+- OAuth scopes are limited to only the minimum required permissions per integration.
+- No user data is stored long-term except connection metadata (e.g., which app is linked).
+- All identifiers are anonymized using Cognito UUIDs.
+
+### Responsible AI Practices
+- AWS Bedrock Guardrails are used to enforce content moderation and prompt safety.
+- Unsafe user inputs are filtered and never processed by the model.
+- Chat interactions are monitored for fairness, harmful output, and alignment violations.
