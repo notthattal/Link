@@ -37,7 +37,6 @@ python-dotenv==1.1.0
 requests==2.32.4
 flask==3.1.1
 flask-cors==6.0.1
-flask-limiter==3.11.0
 pytest==8.4.0
 pytest-cov==6.1.1
 pydantic==2.11.5
@@ -125,11 +124,6 @@ pytest --cov=.
 
 - AWS Cognito handles all user authentication flows.
 - Only verified users are allowed to invoke protected endpoints.
-
-### Rate Limiting
-
-- Flask backend enforces rate limiting at 25 requests per minute using `flask-limiter`.
-- Additional throttling and usage plans can be configured via API Gateway for production deployments.
 
 ### Data Handling and Privacy
 

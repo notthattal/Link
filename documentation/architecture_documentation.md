@@ -35,7 +35,6 @@ python-dotenv==1.1.0
 requests==2.32.4
 flask==3.1.1
 flask-cors==6.0.1
-flask-limiter==3.11.0
 pytest==8.4.0
 pytest-cov==6.1.1
 pydantic==2.11.5

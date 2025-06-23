@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify, abort, make_response
 from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from services.utils.user_cache import user_tools_cache
 from services.utils.cognito_utils import get_user_from_token
 from services.utils.tools.app_manager import AppManager
@@ -18,12 +16,6 @@ app.register_blueprint(connections_bp)
 app.register_blueprint(sso_service_bp)
 
 CORS(app, supports_credentials=True, origins='*', allow_headers=["Content-Type", "Authorization"])
-
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["25 per minute"]
-)
 
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION', 'us-east-1'))
 table = dynamodb.Table('link-connections-table')
@@ -44,7 +36,6 @@ def check_auth():
         if not auth or not auth.startswith('Bearer '):
             abort(401, 'Missing or invalid Authorization header')
 
-@limiter.limit("25 per minute")
 @app.route('/generate', methods=['POST', 'OPTIONS'])
 def generate():
     if request.method == 'OPTIONS':
