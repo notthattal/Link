@@ -5,7 +5,7 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import './ConnectApps.css';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-const frontendUrl = import.meta.env.VITE_REDIRECT_URI;
+const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
 
 const ConnectApps = ({ user }) => {
  const navigate = useNavigate();
