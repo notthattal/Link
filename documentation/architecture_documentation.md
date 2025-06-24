@@ -5,7 +5,7 @@ This system is a chatbot that a user can connect external applications to and us
 
 ### Architecture Diagram
 
-![Architecture Diagram](./img/architecture_diagram.png)
+![Architecture Diagram](../img/architecture_diagram.png)
 
 ### Flow
 1. A user can either sign-in or create an account which is authenticated through AWS Cognito
